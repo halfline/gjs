@@ -1036,14 +1036,7 @@ wrapped_gobj_toggle_notify(gpointer      data,
          * The JSObject is rooted and we need to unroot it so it
          * can be garbage collected
          */
-        if (gc_blocked) {
-            if (G_UNLIKELY (toggle_up_queued || toggle_down_queued)) {
-                g_error("toggling down object %s that's already queued to toggle %s\n",
-                        G_OBJECT_TYPE_NAME(gobj),
-                        toggle_up_queued && toggle_down_queued? "up and down" :
-                        toggle_up_queued? "up" : "down");
-            }
-
+        if (gc_blocked && !toggle_up_queued && !toggle_down_queued) {
             handle_toggle_down(context, gobj);
         } else {
             queue_toggle_idle(gobj, context, TOGGLE_DOWN);
@@ -1054,12 +1047,7 @@ wrapped_gobj_toggle_notify(gpointer      data,
          * The JSObject associated with the gobject is not rooted,
          * but it needs to be. We'll root it.
          */
-        if (gc_blocked && !toggle_down_queued) {
-            if (G_UNLIKELY (toggle_up_queued)) {
-                g_error("toggling up object %s that's already queued to toggle up\n",
-                        G_OBJECT_TYPE_NAME(gobj));
-            }
-
+        if (gc_blocked && && !toggle_up_queued && !toggle_down_queued) {
             handle_toggle_up(context, gobj, gc_blocked);
         } else {
             queue_toggle_idle(gobj, context, TOGGLE_UP);
